@@ -27,7 +27,7 @@ def before_feature(context, feature):
     # Get DAST configuration
     context.pscan = context.toolium_config.getboolean_optional('DAST', 'pscan')
     context.ascan = context.toolium_config.getboolean_optional('DAST', 'ascan')
-    context.target = context.toolium_config.get('DAST', 'target')
+    context.targets = context.toolium_config.get('DAST', 'targets').split(',')
     api_key = context.toolium_config.get('DAST', 'api_key')
 
     # Initialize ZAProxy
@@ -60,13 +60,15 @@ def after_scenario(context, scenario):
             time.sleep(1)
 
     if context.ascan:
-        context.zap_scan_id = context.zap.ascan.scan(context.target)
-        print('Active Scan progress')
-        while int(context.zap.ascan.status(context.zap_scan_id)) < 100:
-            scan_count = int(context.zap.ascan.status(context.zap_scan_id))
-            progress_bar(scan_count)
-            time.sleep(10)
-        context.zap_scan_id = None
+        for target in context.targets:
+            context.zap_scan_id = context.zap.ascan.scan(target)
+            print(f'\nActive Scan progress for target "{target}"')
+            while int(context.zap.ascan.status(context.zap_scan_id)) < 100:
+                scan_count = int(context.zap.ascan.status(context.zap_scan_id))
+                progress_bar(scan_count)
+                time.sleep(10)
+            progress_bar(100)
+            context.zap_scan_id = None
     
     toolium_after_scenario(context, scenario)
 
