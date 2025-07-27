@@ -28,9 +28,9 @@ jobs:
     - name: Start selenoid
       uses: Xotabu4/selenoid-github-action@v2
     - name: Start ZAP
-      uses: OWASP/zap2docker-github-action@v1
+      uses: zaproxy/action-baseline@v0.14.0
       with:
-        zap-args: '-daemon -host 0.0.0.0 -port 8080 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config api.key=change-me-9203935709'
+        cmd_options: '-daemon -host 0.0.0.0 -port 8080 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config api.key=change-me-9203935709'
     - name: Run tests
       run: |
         behave test --junit --junit-directory test/output -t "@ci_test"
