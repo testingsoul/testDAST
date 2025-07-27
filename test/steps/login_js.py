@@ -10,7 +10,7 @@ from pageobjects.main_page import MainPagePageObject
 def step_impl(context):
     
     context.driver.get('{}'.format('https://juice-shop.herokuapp.com'))
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 
 
 
