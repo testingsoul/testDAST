@@ -35,7 +35,7 @@ jobs:
         sleep 60
     - name: Run tests
       run: |
-        behave test --junit --junit-directory test/output -t "@ci_test"
+        cd test && behave --junit --junit-directory test/output -t "@ci_test"
     - name: Upload Acceptance Test Results
       if: always()
       uses: actions/upload-artifact@v4
