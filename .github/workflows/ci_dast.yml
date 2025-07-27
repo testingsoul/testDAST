@@ -24,7 +24,7 @@ jobs:
         python-version: "3.12"
     - name: Install requirements
       run: |
-        pip install -r requirements.txt
+        pip install -r test/requirements.txt
     - name: Start selenoid
       uses: Xotabu4/selenoid-github-action@v2
     - name: Start ZAP
