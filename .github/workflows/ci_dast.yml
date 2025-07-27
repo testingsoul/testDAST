@@ -27,10 +27,19 @@ jobs:
         pip install -r test/requirements.txt
     - name: Start selenoid
       uses: Xotabu4/selenoid-github-action@v2
-    - name: Start ZAP
-      uses: zaproxy/action-full-scan@v0.12.0
-      with:
-        cmd_options: '-daemon -host 0.0.0.0 -port 8080 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config api.key=change-me-9203935709'
+    - name: Start ZAP via Docker
+      run: |
+        docker run -u zap -p 8080:8080 -d zaproxy/zap-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config api.key=change-me-9203935709
+    - name: Wait for ZAP to be ready
+      run: |
+        for i in {1..30}; do
+          if nc -z localhost 8080; then
+            echo "ZAP is up!"
+            break
+          fi
+          echo "Waiting for ZAP..."
+          sleep 5
+        done
     - name: Run tests
       run: |
         behave test --junit --junit-directory test/output -t "@ci_test"
