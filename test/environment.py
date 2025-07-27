@@ -45,7 +45,7 @@ def before_scenario(context, scenario):
     :param scenario: running scenario
     """
     toolium_before_scenario(context, scenario)
-
+    
 
 def after_scenario(context, scenario):
     """Clean method that will be executed after each scenario

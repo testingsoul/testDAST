@@ -1,0 +1,72 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Test Execution
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.12"
+    - name: Install requirements
+      run: |
+        pip install -r requirements.txt
+    - name: Start selenoid
+      uses: Xotabu4/selenoid-github-action@v2
+    - name: Start ZAP
+      uses: OWASP/zap2docker-github-action@v1
+      with:
+        zap-args: '-daemon -host 0.0.0.0 -port 8080 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config api.key=change-me-9203935709'
+    - name: Run tests
+      run: |
+        behave test --junit --junit-directory test/output -t "@ci_test"
+    - name: Upload Acceptance Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: acceptance-tests-results
+        path: test/output/*
+        retention-days: 1
+    
+
+  publish-acceptance-test-results:
+    name: "Publish Acceptance Tests Results"
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    if: success() || failure()
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Download Acceptance test Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: acceptance-tests-results
+          path: acceptance-tests-results
+
+      - name: Publish Acceptance Test Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        with:
+          files: acceptance-tests-results/*.xml
+          comment_title: "Acceptance Tests Results"
+
+
